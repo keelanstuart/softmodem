@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Samples/softerm/softerm.vcxproj" Id="dbc22677-994c-455d-9e06-74f8df300e17">
+    <BuildDependency Project="softmodem.vcxproj" />
+  </Project>
+  <Project Path="softmodem.vcxproj" Id="a952f43b-466e-49fa-8e25-7bab32727090" />
+</Solution>
