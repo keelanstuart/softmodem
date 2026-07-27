@@ -191,7 +191,7 @@ double Modem_Bell103::CurrentTxFrequency() const
 }
 
 
-constexpr size_t AnalysisWindow = 120;
+constexpr size_t AnalysisWindow = 96;
 constexpr size_t AnalysisHop = 4;
 constexpr float ToneThreshold = 0.20f;
 constexpr float DecisionEpsilon = 1.0e-9f;

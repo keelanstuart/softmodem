@@ -48,7 +48,7 @@ protected:
 	void RxAnalyzeWindow();
 	void RxAdvanceFraming();
 
-	std::array<float, 120> m_RxHistory;
+	std::array<float, 96> m_RxHistory;
 	size_t m_RxHistoryIdx;
 	size_t m_RxHistoryCount;
 	size_t m_RxSamplesSinceAnalysis;
