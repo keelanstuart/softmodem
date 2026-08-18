@@ -192,6 +192,7 @@
     <ClInclude Include="Source\miniaudio.h" />
     <ClInclude Include="Source\Modem_Base.h" />
     <ClInclude Include="Source\Modem_Bell103.h" />
+    <ClInclude Include="Source\Modem_SR71.h" />
     <ClInclude Include="Source\pch.h" />
     <ClInclude Include="Source\RingBuffer.h" />
     <ClInclude Include="Source\ToneRecognizer.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="Source\dllmain.cpp" />
     <ClCompile Include="Source\Modem_Base.cpp" />
     <ClCompile Include="Source\Modem_Bell103.cpp" />
+    <ClCompile Include="Source\Modem_SR71.cpp" />
     <ClCompile Include="Source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>

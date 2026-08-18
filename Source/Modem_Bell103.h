@@ -15,7 +15,7 @@ class Modem_Bell103 : public Modem
 
 public:
 
-	Modem_Bell103();
+	Modem_Bell103(OutputDeviceIdx oidx = -1, InputDeviceIdx iidx = -1);
 	virtual ~Modem_Bell103();
 
 	virtual bool Initialize();

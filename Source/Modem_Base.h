@@ -18,15 +18,16 @@ public:
 		StopBit
 	};
 
-	Modem();
+	Modem(OutputDeviceIdx oidx, InputDeviceIdx iidx);
 	virtual ~Modem();
 
 	virtual void Release();
 	virtual bool Initialize();
 	virtual bool Start(Role r);
 	virtual bool Stop();
-	virtual bool Send(const uint8_t *buffer, size_t buffer_size);
-	virtual bool Receive(uint8_t *buffer, size_t buffer_size, size_t expected, bool block);
+	virtual size_t Send(const uint8_t *buffer, size_t buffer_size);
+	virtual size_t Receive(uint8_t *buffer, size_t buffer_size, size_t expected, ReceiveBlockFunc block_func);
+	virtual bool Online();
 
 
 protected:

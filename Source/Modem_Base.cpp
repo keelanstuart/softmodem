@@ -3,12 +3,33 @@
 #include "miniaudio.h"
 
 
-Modem::Modem() : m_RxBytes(4096, nullptr, nullptr), m_TxBytes(4096, nullptr, nullptr)
+Modem::Modem(OutputDeviceIdx oidx, InputDeviceIdx iidx) : m_RxBytes(4096, nullptr, nullptr), m_TxBytes(4096, nullptr, nullptr)
 {
+	ma_context context;
+	ma_context_init(nullptr, 0, nullptr, &context);
+
 	m_DeviceConfig = ma_device_config_init(ma_device_type_duplex);
+
+	ma_device_info *playback_devices = nullptr;
+	ma_uint32 playback_count = 0;
+
+	ma_device_info *capture_devices = nullptr;
+	ma_uint32 capture_count = 0;
+
+	ma_context_get_devices(&context, &playback_devices, &playback_count, &capture_devices, &capture_count);
+		
+	if ((oidx != -1) && (oidx < playback_count))
+		m_DeviceConfig.playback.pDeviceID = &playback_devices[oidx].id;
+	else
+		m_DeviceConfig.playback.pDeviceID = nullptr;
 
 	m_DeviceConfig.playback.format		= ma_format_f32;
 	m_DeviceConfig.playback.channels	= 1;
+
+	if ((oidx != -1) && (oidx < playback_count))
+		m_DeviceConfig.capture.pDeviceID = &capture_devices[oidx].id;
+	else
+		m_DeviceConfig.capture.pDeviceID = nullptr;
 
 	m_DeviceConfig.capture.format		= ma_format_f32;
 	m_DeviceConfig.capture.channels	= 1;
@@ -19,8 +40,9 @@ Modem::Modem() : m_RxBytes(4096, nullptr, nullptr), m_TxBytes(4096, nullptr, nul
 
 	m_DeviceConfig.pUserData			= this;
 
-	m_Role = Role::Off;
+	m_Role = Role::Originate;
 }
+
 
 Modem::~Modem()
 {
@@ -46,15 +68,10 @@ void Modem::Release()
 
 bool Modem::Start(Role r)
 {
-	if (m_Role != Role::Off)
-		return false;
-
 	if (ma_device_start(&m_Device) != MA_SUCCESS)
 		return false;
 
 	m_Role = r;
-
-	//m_TxState = State::Idle;
 
 	return true;
 }
@@ -62,11 +79,6 @@ bool Modem::Start(Role r)
 
 bool Modem::Stop()
 {
-	if (m_Role == Role::Off)
-		return false;
-
-	m_Role = Role::Off;
-
 	ma_device_stop(&m_Device);
 
 	m_TxState = State::NoCarrier;
@@ -75,21 +87,21 @@ bool Modem::Stop()
 	return true;
 }
 
-bool Modem::Send(const uint8_t *buffer, size_t buffer_size)
+
+size_t Modem::Send(const uint8_t *buffer, size_t buffer_size)
 {
+	size_t tx = 0;
+
 	// the user may want to send more than our ring buffer can take if not enough have
 	// been sent by the modem yet... so we wait until it's possible
-	while (buffer_size)
+	while (tx < buffer_size)
 	{
 		if (m_TxState == State::NoCarrier)
-			return false;
+			return 0;
 
-		size_t tx = m_TxBytes.Write(buffer, buffer_size);
+		tx += m_TxBytes.Write(&buffer[tx], buffer_size - tx);
 		if (tx >= buffer_size)
-			return true;
-
-		buffer_size -= tx;
-		buffer += tx;
+			return tx;
 
 		::Sleep(0);
 	}
@@ -97,30 +109,43 @@ bool Modem::Send(const uint8_t *buffer, size_t buffer_size)
 	return true;
 }
 
-bool Modem::Receive(uint8_t *buffer, size_t buffer_size, size_t expected, bool block)
+
+size_t Modem::Receive(uint8_t *buffer, size_t buffer_size, size_t expected, ReceiveBlockFunc block_func)
 {
 	expected = std::min<size_t>(expected, buffer_size);
 
-	// the user may want to send more than our ring buffer can take if not enough have
-	// been sent by the modem yet... so we wait until it's possible
-	while (expected)
+	size_t rx = 0;
+
+	while (rx < expected)
 	{
 		if (m_RxState == State::NoCarrier)
-			return false;
+			return 0;
 
-		size_t rx = m_RxBytes.Read(buffer, expected);
-		if (!block && !rx)
-			return false;
+		if (!block_func)
+		{
+			return m_RxBytes.Read(buffer, expected);
+		}
+		else
+		{
+			rx += m_RxBytes.Read(&buffer[rx], 1);
 
-		expected -= rx;
-		buffer += rx;
+			switch (block_func(buffer[rx]))
+			{
+				case ReceiveBlockReturn::EndBlock:
+					return rx;
+
+				case ReceiveBlockReturn::DiscardBlock:
+					return 0;
+			}
+		}
 
 		if (rx < expected)
 			::Sleep(0);
 	}
 
-	return true;
+	return rx;
 }
+
 
 void Modem::WaveformCallback(ma_device *pDevice, float *pOutput, const float *pInput, ma_uint32 frameCount)
 {
@@ -128,4 +153,10 @@ void Modem::WaveformCallback(ma_device *pDevice, float *pOutput, const float *pI
 
 	_this->TxWaveform(pOutput, frameCount);
 	_this->RxWaveform(pInput, frameCount);
+}
+
+
+bool Modem::Online()
+{
+	return (m_RxState != State::NoCarrier);
 }

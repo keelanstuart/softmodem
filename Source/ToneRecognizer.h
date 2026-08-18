@@ -4,7 +4,7 @@ class ToneRecognizer
 {
 
 public:
-	ToneRecognizer(float frequency);
+	ToneRecognizer(float frequency, float sample_rate = 48000.0f);
 
 	void Reset();
 

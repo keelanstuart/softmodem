@@ -45,6 +45,9 @@
     <ClInclude Include="Include\softmodem.h">
       <Filter>Header Files\Public</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Modem_SR71.h">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Modem_Base.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\Modem_Bell103.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modem_SR71.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

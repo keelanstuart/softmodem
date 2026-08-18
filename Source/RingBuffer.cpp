@@ -4,7 +4,7 @@
 
 inline size_t BytesWaiting(size_t tail, size_t head, size_t capacity)
 {
-	return (head + capacity - tail) % capacity - 1;
+	return (head + capacity - tail) % capacity;
 }
 
 
@@ -76,6 +76,6 @@ size_t RingBuffer::Read(uint8_t *buf, size_t buflen)
 
 void RingBuffer::Clear()
 {
-	m_Head = 1;
+	m_Head = 0;
 	m_Tail = 0;
 }

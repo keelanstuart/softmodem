@@ -9,14 +9,14 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 
-IModem *IModem::Create(IModem::ModemStandard m)
+IModem *IModem::Create(IModem::ModemStandard m, OutputDeviceIdx oidx, InputDeviceIdx iidx)
 {
 	IModem *ret = nullptr;
 
 	switch (m)
 	{
 		case IModem::ModemStandard::Bell103:
-			ret = new Modem_Bell103();
+			ret = new Modem_Bell103(oidx, iidx);
 			break;
 	}
 

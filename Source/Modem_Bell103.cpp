@@ -2,8 +2,8 @@
 #include "Modem_Bell103.h"
 
 
-Modem_Bell103::Modem_Bell103()
-	: Modem(),
+Modem_Bell103::Modem_Bell103(OutputDeviceIdx oidx, InputDeviceIdx iidx)
+	: Modem(oidx, iidx),
 	m_RxMark_Originate(BELL103_ORIGINATE_MARK),
 	m_RxSpace_Originate(BELL103_ORIGINATE_SPACE),
 	m_RxMark_Answer(BELL103_ANSWER_MARK),
@@ -41,7 +41,7 @@ bool Modem_Bell103::Initialize()
 
 	m_FramesPerBit = m_Device.sampleRate / 300;
 
-	m_TxState = State::NoCarrier;
+	m_TxState = State::Idle;
 
 	m_TxWaveConfig = ma_waveform_config_init(m_Device.playback.format, m_Device.playback.channels, m_Device.sampleRate,
 		ma_waveform_type_sine, 1.0, 0.0);
@@ -114,9 +114,9 @@ void Modem_Bell103::TxWaveform(float *poutput, uint32_t frame_count)
 		if (m_TxFramesRemaining == 0)
 			AdvanceTxState();
 
-		const ma_uint32 framesToGenerate = std::min<uint32_t>(frame_count, m_TxFramesRemaining);
+		ma_uint32 framesToGenerate = std::min<uint32_t>(frame_count, m_TxFramesRemaining);
 
-		const double frequency = CurrentTxFrequency();
+		double frequency = CurrentTxFrequency();
 
 		ma_waveform_set_frequency(&m_TxWave, frequency);
 		ma_waveform_read_pcm_frames(&m_TxWave, poutput, framesToGenerate, nullptr);
@@ -271,7 +271,7 @@ void Modem_Bell103::RxAnalyzeWindow()
 	const Tone previous = m_RxDetectedTone;
 	Tone detected = previous;
 
-	// hysteresis: when neither tone wins clearly, retain the previous
+	// when neither tone wins clearly, retain the previous
 	// result rather than rapidly switching around zero
 
 	if (m_RxDecision > ToneThreshold)

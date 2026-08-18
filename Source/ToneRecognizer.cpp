@@ -3,10 +3,10 @@
 #include <math.h>
 #include <numbers>
 
-ToneRecognizer::ToneRecognizer(float frequency)
+ToneRecognizer::ToneRecognizer(float frequency, float sample_rate)
 {
-	// assume 48Khz sampling
-	const float omega = 2.0f * std::numbers::pi_v<float> * frequency / 48000.0f;
+	const float omega = 2.0f * std::numbers::pi_v<float> * frequency / sample_rate;
+
 	m_Coefficient = 2.0f * cosf(omega);
 
 	Reset();
